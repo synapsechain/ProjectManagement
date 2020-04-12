@@ -1,7 +1,6 @@
 # ProjectManagement
-## how to run ProjectManagement test solution
+## How to run project management test solution
 - specify proper connection string in appsettings.json
-- in Package Manager Console run:
-```
-Update-Database
-```
+- to create a db and populate it with test data specify connection string in DesignTimeProjectManagementContext.cs
+and in Package Manager Console run: 'Update-Database -Context DesignTimeProjectManagementContext'
+

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagement.Data.Entities;
 
-namespace ProjectManagement.Data
+namespace ProjectManagement.Data.Contexts
 {
     public class ProjectManagementContext : DbContext
     {
