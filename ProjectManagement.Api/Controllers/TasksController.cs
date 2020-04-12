@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectManagement.Data.Contexts;
 using ProjectManagement.Data.Entities;
 using AutoMapper;
+using System;
 
 namespace ProjectManagement.Api.Controllers
 {
@@ -22,14 +23,12 @@ namespace ProjectManagement.Api.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Tasks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectTaskDto>>> GetProjectTasks()
         {
             return await _context.ProjectTasks.Select(x => _mapper.Map<ProjectTaskDto>(x)).ToListAsync();
         }
 
-        // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectTaskDto>> GetProjectTask(int id)
         {
@@ -43,51 +42,74 @@ namespace ProjectManagement.Api.Controllers
             return _mapper.Map<ProjectTaskDto>(projectTask);
         }
 
-        // PUT: api/Tasks/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjectTask(int id, ProjectTask projectTask)
+        public async Task<IActionResult> PutProjectTask(int id, ProjectTaskDto projectTaskDto)
         {
-            if (id != projectTask.ProjectTaskId)
-            {
+            if (id != projectTaskDto.ProjectTaskId)
                 return BadRequest();
-            }
 
-            _context.Entry(projectTask).State = EntityState.Modified;
+            var task = _context.ProjectTasks.Find(id);
+            if (task == null)
+                return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProjectTaskExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            ValidateTask(projectTaskDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            await UpdateTask(task, projectTaskDto);
             return NoContent();
         }
 
-        // POST: api/Tasks
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<ProjectTaskDto>> PostProjectTask(ProjectTask projectTask)
+        private void ValidateTask(ProjectTaskDto task)
         {
-            _context.ProjectTasks.Add(projectTask);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetProjectTask), new { id = projectTask.ProjectTaskId }, _mapper.Map<ProjectTaskDto>(projectTask));
+            if (task.ParentProjectTaskId.HasValue)
+            {
+                var parentTask = _context.ProjectTasks.Find(task.ParentProjectTaskId.Value);
+                if (parentTask?.ProjectId != task.ProjectId)
+                    ModelState.AddModelError(nameof(task.ParentProjectTaskId), "Task cannot have parent task from different project");
+            }
         }
 
-        // DELETE: api/Tasks/5
+        private async Task UpdateTask(ProjectTask task, ProjectTaskDto taskDto)
+        {
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                if (task.State != taskDto.State)
+                {
+                    task.State = taskDto.State;
+                    UpdateParentProjectsStates(task);
+                }
+
+                _mapper.Map(taskDto, task);
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+            }
+        }
+
+        private void UpdateParentProjectsStates(ProjectTask dbTask)
+        {
+            var project = dbTask.Project;
+            while (project != null)
+            {
+                project.State = project.CalculatedState;
+                project = project.ParentProject;
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ProjectTaskDto>> PostProjectTask(ProjectTaskDto projectTaskDto)
+        {
+            ValidateTask(projectTaskDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var task = _context.ProjectTasks.Add(_mapper.Map<ProjectTask>(projectTaskDto));
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetProjectTask), new { id = task.Entity.ProjectTaskId }, _mapper.Map<ProjectTaskDto>(task.Entity));
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<ProjectTaskDto>> DeleteProjectTask(int id)
         {
@@ -97,15 +119,24 @@ namespace ProjectManagement.Api.Controllers
                 return NotFound();
             }
 
-            _context.ProjectTasks.Remove(projectTask);
-            await _context.SaveChangesAsync();
+            await DeleteProjectTask(projectTask);
 
             return _mapper.Map<ProjectTaskDto>(projectTask);
         }
-
-        private bool ProjectTaskExists(int id)
+        private async Task DeleteProjectTask(ProjectTask projectTask)
         {
-            return _context.ProjectTasks.Any(e => e.ProjectTaskId == id);
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                //TODO: clarify behaviour (currently it updates all nested tasks and sets their ParentProjectTaskId to null)
+                var nestedTasks = await _context.ProjectTasks.Where(x => x.ParentProjectTaskId == projectTask.ProjectTaskId).ToListAsync();
+                nestedTasks.ForEach(x => x.ParentProjectTaskId = null);
+
+                _context.ProjectTasks.Remove(projectTask);
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+            }
         }
+
     }
 }

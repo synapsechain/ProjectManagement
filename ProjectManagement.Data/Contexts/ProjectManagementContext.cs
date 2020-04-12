@@ -23,6 +23,7 @@ namespace ProjectManagement.Data.Contexts
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.State).HasConversion<string>();
             builder.Ignore(x => x.AllTasks);
+            builder.Ignore(x => x.CalculatedState);
         }
 
         public static void ConfigureProjectTask(EntityTypeBuilder<ProjectTask> builder)

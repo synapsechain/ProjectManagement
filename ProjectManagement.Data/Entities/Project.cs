@@ -35,5 +35,17 @@ namespace ProjectManagement.Data.Entities
         {
             get => Tasks.NeverNull().Concat(Projects.NeverNull().SelectMany(x => x.AllTasks));
         }
+
+        public ItemState CalculatedState
+        {
+            get
+            {
+                var allTasks = AllTasks;
+                if (allTasks.All(x => x.State == ItemState.Completed)) return ItemState.Completed;
+                if (allTasks.Any(x => x.State == ItemState.InProgress)) return ItemState.InProgress;
+
+                return ItemState.Planned;
+            }
+        }
     }
 }

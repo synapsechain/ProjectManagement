@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagement.Data.Contexts;
 using ProjectManagement.Data.Entities;
+using System;
 
 namespace ProjectManagement.Api.Controllers
 {
@@ -22,14 +23,12 @@ namespace ProjectManagement.Api.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Projects
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjects()
         {
             return await _context.Projects.Select(x => _mapper.Map<ProjectDto>(x)).ToListAsync();
         }
 
-        // GET: api/Projects/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDto>> GetProject(int id)
         {
@@ -43,51 +42,53 @@ namespace ProjectManagement.Api.Controllers
             return _mapper.Map<ProjectDto>(project);
         }
 
-        // PUT: api/Projects/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProject(int id, Project project)
+        public async Task<IActionResult> PutProject(int id, ProjectDto projectDto)
         {
-            if (id != project.ProjectId)
+            if (id != projectDto.ProjectId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(project).State = EntityState.Modified;
+            var project = _context.Projects.Find(id);
+            if (project == null)
+                return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProjectExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            ValidateProject(projectDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await UpdateProject(project, projectDto);
 
             return NoContent();
         }
 
-        // POST: api/Projects
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<ProjectDto>> PostProject(Project project)
+        private async Task UpdateProject(Project project, ProjectDto projectDto)
         {
-            _context.Projects.Add(project);
+            _mapper.Map(projectDto, project);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetProject), new { id = project.ProjectId }, _mapper.Map<ProjectDto>(project));
         }
 
-        // DELETE: api/Projects/5
+        [HttpPost]
+        public async Task<ActionResult<ProjectDto>> PostProject(ProjectDto projectDto)
+        {
+            ValidateProject(projectDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var projectEntity = _context.Projects.Add(_mapper.Map<Project>(projectDto));
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetProject), new { id = projectEntity.Entity.ProjectId }, _mapper.Map<ProjectDto>(projectEntity.Entity));
+        }
+
+        private void ValidateProject(ProjectDto projectDto)
+        {
+            if (projectDto.ParentProjectId.HasValue &&
+                _context.Projects.Find(projectDto.ParentProjectId) == null)
+                ModelState.AddModelError(nameof(projectDto.ParentProjectId), "Parent project does not exist");
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<ProjectDto>> DeleteProject(int id)
         {
