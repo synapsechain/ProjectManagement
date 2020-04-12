@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace ProjectManagement.Data.Entities
 {
@@ -10,16 +11,20 @@ namespace ProjectManagement.Data.Entities
         Completed
     }
 
-    public class Project
+    public class ProjectDto
     {
         public int ProjectId { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime FinishDate { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ItemState State { get; set; }
         public int? ParentProjectId { get; set; }
+    }
 
+    public class Project : ProjectDto
+    {
         public virtual Project ParentProject { get; set; }
         public virtual List<Project> Projects { get; set; }
         public virtual List<ProjectTask> Tasks { get; set; }

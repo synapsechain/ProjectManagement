@@ -8,7 +8,7 @@ namespace ProjectManagement.Data.Contexts
         //HACK: this class was added to enable design-time database creation and filling
         //in Package Manager Console run: 'Update-Database -Context DesignTimeProjectManagementContext
         public DesignTimeProjectManagementContext() : this(new DbContextOptionsBuilder<ProjectManagementContext>()
-                .UseSqlServer(@"Data Source=.;Initial Catalog=pms;Integrated Security=true;")
+                .UseSqlServer(@"Data Source=.;Initial Catalog=projects;Integrated Security=true;")
                 .Options) { }
 
         public DesignTimeProjectManagementContext(DbContextOptions<ProjectManagementContext> options) : base(options) { }

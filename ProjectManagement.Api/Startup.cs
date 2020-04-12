@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectManagement.Data.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
 
 namespace ProjectManagement.Api
 {
@@ -23,6 +24,7 @@ namespace ProjectManagement.Api
             services.AddControllers();
             services.AddDbContext<ProjectManagementContext>(options => options
                 .UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
