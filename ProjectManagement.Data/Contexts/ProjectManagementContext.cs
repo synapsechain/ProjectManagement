@@ -22,12 +22,14 @@ namespace ProjectManagement.Data.Contexts
             builder.Property(x => x.Code).IsRequired();
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.State).HasConversion<string>();
+            builder.Ignore(x => x.AllTasks);
         }
 
         public static void ConfigureProjectTask(EntityTypeBuilder<ProjectTask> builder)
         {
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.State).HasConversion<string>();
+            builder.Ignore(x => x.TopLevelProject);
         }
     }
 }

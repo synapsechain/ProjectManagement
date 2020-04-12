@@ -6,3 +6,5 @@ and in Package Manager Console run: `Update-Database -Context DesignTimeProjectM
 ## Areas of improvement
 - add mediatr + cqrs
 - add logging
+- add unit tests
+- add integration tests

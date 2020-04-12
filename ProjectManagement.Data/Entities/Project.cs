@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using ProjectManagement.Data.Tools;
 using System.Text.Json.Serialization;
 
 namespace ProjectManagement.Data.Entities
@@ -28,5 +30,10 @@ namespace ProjectManagement.Data.Entities
         public virtual Project ParentProject { get; set; }
         public virtual List<Project> Projects { get; set; }
         public virtual List<ProjectTask> Tasks { get; set; }
+
+        public IEnumerable<ProjectTask> AllTasks
+        {
+            get => Tasks.NeverNull().Concat(Projects.NeverNull().SelectMany(x => x.AllTasks));
+        }
     }
 }

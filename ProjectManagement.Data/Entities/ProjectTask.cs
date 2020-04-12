@@ -22,5 +22,18 @@ namespace ProjectManagement.Data.Entities
         public virtual Project Project { get; set; }
         public virtual ProjectTask ParentProjectTask { get; set; }
         public virtual List<ProjectTask> Tasks { get; set; }
+
+        public Project TopLevelProject
+        {
+            get
+            {
+                var project = Project;
+
+                while (project?.ParentProject != null)
+                    project = project.ParentProject;
+
+                return project;
+            }
+        }
     }
 }

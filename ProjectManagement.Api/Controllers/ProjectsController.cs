@@ -84,7 +84,7 @@ namespace ProjectManagement.Api.Controllers
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProject", new { id = project.ProjectId }, _mapper.Map<ProjectDto>(project));
+            return CreatedAtAction(nameof(GetProject), new { id = project.ProjectId }, _mapper.Map<ProjectDto>(project));
         }
 
         // DELETE: api/Projects/5
