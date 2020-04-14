@@ -14,7 +14,7 @@ namespace ProjectManagement.Api.Services
 {
     public interface IReportGeneratorService
     {
-        Task<byte[]> GenerateReportFile(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch);
+        Task<byte[]> GenerateReportFileAsync(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch);
     }
 
     public class ReportGeneratorService : IReportGeneratorService
@@ -29,7 +29,7 @@ namespace ProjectManagement.Api.Services
             _dts = dts;
         }
 
-        public async Task<byte[]> GenerateReportFile(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch)
+        public async Task<byte[]> GenerateReportFileAsync(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch)
         {
             byte[] fileContents;
 

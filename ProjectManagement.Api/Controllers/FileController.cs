@@ -27,12 +27,12 @@ namespace ProjectManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<FileResult> Get(DateTime? dateTime)
+        public async Task<FileResult> GetAsync(DateTime? dateTime)
         {
             if (!dateTime.HasValue)
                 dateTime = _dts.Now;
 
-            Expression<Func<ProjectTask, bool>> taskSearch = x => x.StartDate <= dateTime;
+            Expression<Func<ProjectTask, bool>> taskSearch = x => x.StartDate <= dateTime && x.State == ItemState.InProgress;
 
             var tasks = await _context.ProjectTasks
                 .Include(x => x.Project)
@@ -41,7 +41,7 @@ namespace ProjectManagement.Api.Controllers
 
             var projects = tasks.Select(x => x.TopLevelProject).Distinct();
 
-            var fileContents = await _reportGeneratorService.GenerateReportFile(projects, dateTime.Value, taskSearch);
+            var fileContents = await _reportGeneratorService.GenerateReportFileAsync(projects, dateTime.Value, taskSearch);
 
             return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
         }
