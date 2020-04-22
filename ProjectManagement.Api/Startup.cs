@@ -1,5 +1,6 @@
 using AutoMapper;
 using OfficeOpenXml;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +24,9 @@ namespace ProjectManagement.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation(options => options.RegisterValidatorsFromAssemblyContaining<Startup>());
+
             services.AddDbContext<ProjectManagementContext>(options => options
                 .UseLazyLoadingProxies()
                 .UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
@@ -34,7 +37,7 @@ namespace ProjectManagement.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial; //EPPlus library (composing .xlsx files) licensing type
 

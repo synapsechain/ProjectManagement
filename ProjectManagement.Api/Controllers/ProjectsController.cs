@@ -24,13 +24,13 @@ namespace ProjectManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjectsAsync()
+        public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjects()
         {
             return await _context.Projects.Select(x => _mapper.Map<ProjectDto>(x)).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProjectDto>> GetProjectAsync(int id)
+        public async Task<ActionResult<ProjectDto>> GetProject(int id)
         {
             var project = await _context.Projects.FindAsync(id);
 
@@ -43,7 +43,7 @@ namespace ProjectManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjectAsync(int id, ProjectDto projectDto)
+        public async Task<IActionResult> PutProject(int id, ProjectDto projectDto)
         {
             if (id != projectDto.ProjectId)
             {
@@ -54,43 +54,28 @@ namespace ProjectManagement.Api.Controllers
             if (project == null)
                 return NotFound();
 
-            ValidateProject(projectDto);
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await UpdateProjectAsync(project, projectDto);
+            await UpdateProject(project, projectDto);
 
             return NoContent();
         }
 
-        private async Task UpdateProjectAsync(Project project, ProjectDto projectDto)
+        private async Task UpdateProject(Project project, ProjectDto projectDto)
         {
             _mapper.Map(projectDto, project);
             await _context.SaveChangesAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProjectDto>> PostProjectAsync(ProjectDto projectDto)
+        public async Task<ActionResult<ProjectDto>> PostProject(ProjectDto projectDto)
         {
-            ValidateProject(projectDto);
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var projectEntity = _context.Projects.Add(_mapper.Map<Project>(projectDto));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetProjectAsync), new { id = projectEntity.Entity.ProjectId }, _mapper.Map<ProjectDto>(projectEntity.Entity));
-        }
-
-        private void ValidateProject(ProjectDto projectDto)
-        {
-            if (projectDto.ParentProjectId.HasValue &&
-                _context.Projects.Find(projectDto.ParentProjectId) == null)
-                ModelState.AddModelError(nameof(projectDto.ParentProjectId), "Parent project does not exist");
+            return CreatedAtAction(nameof(GetProject), new { id = projectEntity.Entity.ProjectId }, _mapper.Map<ProjectDto>(projectEntity.Entity));
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ProjectDto>> DeleteProjectAsync(int id)
+        public async Task<ActionResult<ProjectDto>> DeleteProject(int id)
         {
             var project = await _context.Projects.FindAsync(id);
             if (project == null)

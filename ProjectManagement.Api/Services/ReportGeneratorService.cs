@@ -6,32 +6,48 @@ using System.Globalization;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Collections.Generic;
-using ProjectManagement.Data.Entities;
-using ProjectManagement.Data.Models;
 using ProjectManagement.Api.Tools;
+using ProjectManagement.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagement.Data.Entities;
+using ProjectManagement.Data.Contexts;
+using ProjectManagement.Data.Tools;
 
 namespace ProjectManagement.Api.Services
 {
     public interface IReportGeneratorService
     {
-        Task<byte[]> GenerateReportFileAsync(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch);
+        Task<byte[]> GenerateReportFile(DateTime datetime);
     }
 
     public class ReportGeneratorService : IReportGeneratorService
     {
-        private const int START_ROW = 1;
-        private const int START_COLUMN = 1;
-
+        public const int START_ROW = 1;
+        public const int START_COLUMN = 1;
+        
+        private readonly ProjectManagementContext _context;
         private readonly IDateTimeService _dts;
 
-        public ReportGeneratorService(IDateTimeService dts)
+        public ReportGeneratorService(ProjectManagementContext context, IDateTimeService dts)
         {
+            _context = context;
             _dts = dts;
         }
 
-        public async Task<byte[]> GenerateReportFileAsync(IEnumerable<Project> projects, DateTime datetime, Expression<Func<ProjectTask, bool>> taskSearch)
+        public async Task<byte[]> GenerateReportFile(DateTime datetime)
         {
             byte[] fileContents;
+
+            Expression<Func<ProjectTask, bool>> taskSearch = x =>
+                x.StartDate <= datetime && 
+                x.State == ItemState.InProgress;
+
+            var tasks = await _context.ProjectTasks
+                .Include(x => x.Project)
+                .Where(taskSearch)
+                .ToListAsync();
+
+            var projects = tasks.Select(x => x.TopLevelProject).Distinct();
 
             using (var package = new ExcelPackage())
             {
@@ -88,7 +104,7 @@ namespace ProjectManagement.Api.Services
                 .Select(x => x.ToExcelRecord(level + 1)));
 
             //add subprojects that contain specified tasks
-            foreach (var subProject in project.Projects.Where(x => x.AllTasks.AsQueryable().Any(taskSearch)))
+            foreach (var subProject in project.Projects.NeverNull().Where(x => x.AllTasks.AsQueryable().Any(taskSearch)))
             {
                 WriteProjectToCollection(subProject, level + 1, records, projectsIndexes, taskSearch);
             }

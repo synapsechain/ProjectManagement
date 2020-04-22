@@ -8,7 +8,7 @@ namespace ProjectManagement.Data.Tools
 {
     public static class DataSeeder
     {
-        private static Random random = new Random(DateTime.Now.Ticks.GetHashCode());
+        private static readonly Random random = new Random(DateTime.Now.Ticks.GetHashCode());
 
         public static void Seed(this ModelBuilder modelBuilder)
         {

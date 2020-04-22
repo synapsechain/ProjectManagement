@@ -1,12 +1,11 @@
-﻿using System.Linq;
+﻿using AutoMapper;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagement.Data.Contexts;
 using ProjectManagement.Data.Entities;
-using AutoMapper;
-using System;
 
 namespace ProjectManagement.Api.Controllers
 {
@@ -24,13 +23,13 @@ namespace ProjectManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectTaskDto>>> GetProjectTasksAsync()
+        public async Task<ActionResult<IEnumerable<ProjectTaskDto>>> GetProjectTasks()
         {
             return await _context.ProjectTasks.Select(x => _mapper.Map<ProjectTaskDto>(x)).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProjectTaskDto>> GetProjectTaskAsync(int id)
+        public async Task<ActionResult<ProjectTaskDto>> GetProjectTask(int id)
         {
             var projectTask = await _context.ProjectTasks.FindAsync(id);
 
@@ -43,7 +42,7 @@ namespace ProjectManagement.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjectTaskAsync(int id, ProjectTaskDto projectTaskDto)
+        public async Task<IActionResult> PutProjectTask(int id, ProjectTaskDto projectTaskDto)
         {
             if (id != projectTaskDto.ProjectTaskId)
                 return BadRequest();
@@ -52,25 +51,11 @@ namespace ProjectManagement.Api.Controllers
             if (task == null)
                 return NotFound();
 
-            ValidateTask(projectTaskDto);
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await UpdateTaskAsync(task, projectTaskDto);
+            await UpdateTask(task, projectTaskDto);
             return NoContent();
         }
 
-        private void ValidateTask(ProjectTaskDto task)
-        {
-            if (task.ParentProjectTaskId.HasValue)
-            {
-                var parentTask = _context.ProjectTasks.Find(task.ParentProjectTaskId.Value);
-                if (parentTask?.ProjectId != task.ProjectId)
-                    ModelState.AddModelError(nameof(task.ParentProjectTaskId), "Task cannot have parent task from different project");
-            }
-        }
-
-        private async Task UpdateTaskAsync(ProjectTask task, ProjectTaskDto taskDto)
+        private async Task UpdateTask(ProjectTask task, ProjectTaskDto taskDto)
         {
             using (var transaction = _context.Database.BeginTransaction())
             {
@@ -96,22 +81,18 @@ namespace ProjectManagement.Api.Controllers
                 project = project.ParentProject;
             }
         }
-
+        
         [HttpPost]
-        public async Task<ActionResult<ProjectTaskDto>> PostProjectTaskAsync(ProjectTaskDto projectTaskDto)
+        public async Task<ActionResult<ProjectTaskDto>> PostProjectTask(ProjectTaskDto projectTaskDto)
         {
-            ValidateTask(projectTaskDto);
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var task = _context.ProjectTasks.Add(_mapper.Map<ProjectTask>(projectTaskDto));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetProjectTaskAsync), new { id = task.Entity.ProjectTaskId }, _mapper.Map<ProjectTaskDto>(task.Entity));
+            return CreatedAtAction(nameof(GetProjectTask), new { id = task.Entity.ProjectTaskId }, _mapper.Map<ProjectTaskDto>(task.Entity));
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ProjectTaskDto>> DeleteProjectTaskAsync(int id)
+        public async Task<ActionResult<ProjectTaskDto>> DeleteProjectTask(int id)
         {
             var projectTask = await _context.ProjectTasks.FindAsync(id);
             if (projectTask == null)
@@ -119,11 +100,11 @@ namespace ProjectManagement.Api.Controllers
                 return NotFound();
             }
 
-            await DeleteProjectTaskAsync(projectTask);
+            await DeleteProjectTask(projectTask);
 
             return _mapper.Map<ProjectTaskDto>(projectTask);
         }
-        private async Task DeleteProjectTaskAsync(ProjectTask projectTask)
+        private async Task DeleteProjectTask(ProjectTask projectTask)
         {
             using (var transaction = _context.Database.BeginTransaction())
             {

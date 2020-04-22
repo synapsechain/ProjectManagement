@@ -1,44 +1,79 @@
 ﻿using Xunit;
 using FluentAssertions;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using ProjectManagement.Data.Tools;
-using ProjectManagement.Data.Contexts;
+using ProjectManagement.Tests.Utils;
 using ProjectManagement.Api.Controllers;
+using ProjectManagement.Data.Contexts;
 
 namespace ProjectManagement.Tests
 {
     public class ProjectsControllerTests
     {
         [Fact]
-        public async Task AddingNewProject_WithNotExistedParentProject_ShouldResultInBadRequest()
+        public async void PostingProject_ShouldAddProjectToDb()
         {
-            var options = TestHelper.ContextOptions; //ensure that we have same db in the scope of test
+            var options = UnitTestHelper.InMemoryContextOptions;
 
             using (var context = new ProjectManagementContext(options))
             {
-                var projectsController = new ProjectsController(context, TestHelper.Mapper);
-                var result = await projectsController.PostProjectAsync(DataSeeder.NewProject(3, 9));
-                
-                //check
-                result.Result.Should().BeOfType(typeof(BadRequestObjectResult));
+                context.Projects.Should().BeEmpty();
+
+                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
+                var result = await projectsController.PostProject(DataSeeder.NewProject(3));
+            }
+
+            using (var context = new ProjectManagementContext(options))
+            {
+                context.Projects.Should().HaveCount(1);
+            }
+        }
+
+
+        [Fact]
+        public async void DeletingProject_ShouldDeleteProjectFromDb()
+        {
+            var options = UnitTestHelper.InMemoryContextOptions;
+
+            using (var context = new ProjectManagementContext(options))
+            {
+                context.Projects.Add(DataSeeder.NewProject(3));
+                context.SaveChanges();
+                context.Projects.Should().HaveCount(1);
+
+                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
+                var result = await projectsController.DeleteProject(3);
+            }
+
+            using (var context = new ProjectManagementContext(options))
+            {
+                context.Projects.Should().BeEmpty();
             }
         }
 
         [Fact]
-        public async Task UpdatingProject_SettingParentToNotExistedProject_ShouldResultInBadRequest()
+        public async void UpdatingProject_ShouldUpdateProjectInDb()
         {
-            var options = TestHelper.ContextOptions; //ensure that we have same db in the scope of test
+            var options = UnitTestHelper.InMemoryContextOptions;
 
             using (var context = new ProjectManagementContext(options))
             {
-                var projectsController = new ProjectsController(context, TestHelper.Mapper);
-                await projectsController.PostProjectAsync(DataSeeder.NewProject(3));
+                context.Projects.Add(DataSeeder.NewProject(3));
+                context.SaveChanges();
+                context.Projects.Should().HaveCount(1);
 
-                var result = await projectsController.PutProjectAsync(3, DataSeeder.NewProject(3, 9));
+                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
+                var project = DataSeeder.NewProject(3);
+                project.Name = "updated project name";
+                project.Code = "updated project code";
+                var result = await projectsController.PutProject(3, project);
+            }
 
-                //check
-                result.Should().BeOfType(typeof(BadRequestObjectResult));
+            using (var context = new ProjectManagementContext(options))
+            {
+                context.Projects.Should().HaveCount(1);
+                context.Projects.Should().Contain(x =>
+                    x.Name == "updated project name" &&
+                    x.Code == "updated project code");
             }
         }
     }
