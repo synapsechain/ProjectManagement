@@ -15,7 +15,7 @@ Task description you can find in `Software Challenge.pdf` document
 - to create a db and populate it with test data specify connection string in DesignTimeProjectManagementContext.cs
 and in Package Manager Console run: `Update-Database -Context DesignTimeProjectManagementContext`
 ## Areas of improvement
+- remove DesignTimeProjectManagementContext and use IDesignTimeDbContextFactory instead with connection string from appsettings.json
 - add more integration & unit tests to cover more scenarios
-- add mediatr + cqrs
 - add logging
 - consider using EFCore.BulkExtensions package to optimize performance
