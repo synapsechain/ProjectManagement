@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using ProjectManagement.Data.Contexts;
-using ProjectManagement.Data.Entities;
+using ProjectManagement.Api.Data.DTOs;
+using ProjectManagement.Api.Services;
 
 namespace ProjectManagement.Api.Controllers
 {
@@ -13,111 +11,48 @@ namespace ProjectManagement.Api.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        private readonly ProjectManagementContext _context;
-        private readonly IMapper _mapper;
+        private readonly ITaskService _taskService;
 
-        public TasksController(ProjectManagementContext context, IMapper mapper)
+        public TasksController(ITaskService taskService)
         {
-            _context = context;
-            _mapper = mapper;
+            _taskService = taskService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectTaskDto>>> GetProjectTasks()
-        {
-            return await _context.ProjectTasks.Select(x => _mapper.Map<ProjectTaskDto>(x)).ToListAsync();
-        }
+        [ProducesResponseType(typeof(IEnumerable<ProjectTaskDto>), StatusCodes.Status200OK)]
+        public async Task<IEnumerable<ProjectTaskDto>> Get()
+            => await _taskService.Get();
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProjectTaskDto>> GetProjectTask(int id)
-        {
-            var projectTask = await _context.ProjectTasks.FindAsync(id);
-
-            if (projectTask == null)
-            {
-                return NotFound();
-            }
-
-            return _mapper.Map<ProjectTaskDto>(projectTask);
-        }
+        [ProducesResponseType(typeof(ProjectTaskDto), StatusCodes.Status200OK)]
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Get))]
+        public async Task<ProjectTaskDto> Get(int id)
+            => await _taskService.Get(id).ConfigureAwait(false);
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjectTask(int id, ProjectTaskDto projectTaskDto)
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
+        public async Task<IActionResult> PutProjectTask(int id, ProjectTaskDto taskDto)
         {
-            if (id != projectTaskDto.ProjectTaskId)
-                return BadRequest();
+            if (id != taskDto.Id)
+                return BadRequest($"Task id '{id}' != '{taskDto.ProjectId}'");
 
-            var task = _context.ProjectTasks.Find(id);
-            if (task == null)
-                return NotFound();
-
-            await UpdateTask(task, projectTaskDto);
+            await _taskService.UpdateOrThrow(taskDto).ConfigureAwait(false);
+            
             return NoContent();
         }
 
-        private async Task UpdateTask(ProjectTask task, ProjectTaskDto taskDto)
-        {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                if (task.State != taskDto.State)
-                {
-                    task.State = taskDto.State;
-                    UpdateParentProjectsStates(task);
-                }
-
-                _mapper.Map(taskDto, task);
-
-                await _context.SaveChangesAsync();
-                transaction.Commit();
-            }
-        }
-
-        private void UpdateParentProjectsStates(ProjectTask dbTask)
-        {
-            var project = dbTask.Project;
-            while (project != null)
-            {
-                project.State = project.CalculatedState;
-                project = project.ParentProject;
-            }
-        }
-        
         [HttpPost]
-        public async Task<ActionResult<ProjectTaskDto>> PostProjectTask(ProjectTaskDto projectTaskDto)
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
+        public async Task<IActionResult> PostProjectTask(ProjectTaskDto taskDto)
         {
-            var task = _context.ProjectTasks.Add(_mapper.Map<ProjectTask>(projectTaskDto));
-            await _context.SaveChangesAsync();
+            var task = await _taskService.Add(taskDto);
 
-            return CreatedAtAction(nameof(GetProjectTask), new { id = task.Entity.ProjectTaskId }, _mapper.Map<ProjectTaskDto>(task.Entity));
+            return CreatedAtAction(nameof(Get), new { id = task.Id });
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ProjectTaskDto>> DeleteProjectTask(int id)
-        {
-            var projectTask = await _context.ProjectTasks.FindAsync(id);
-            if (projectTask == null)
-            {
-                return NotFound();
-            }
-
-            await DeleteProjectTask(projectTask);
-
-            return _mapper.Map<ProjectTaskDto>(projectTask);
-        }
-        private async Task DeleteProjectTask(ProjectTask projectTask)
-        {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                //TODO: clarify behaviour (currently it updates all nested tasks and sets their ParentProjectTaskId to null)
-                var nestedTasks = await _context.ProjectTasks.Where(x => x.ParentProjectTaskId == projectTask.ProjectTaskId).ToListAsync();
-                nestedTasks.ForEach(x => x.ParentProjectTaskId = null);
-
-                _context.ProjectTasks.Remove(projectTask);
-
-                await _context.SaveChangesAsync();
-                transaction.Commit();
-            }
-        }
-
+        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Delete))]
+        public async Task Delete(int id)
+            => await _taskService.DeleteOrThrow(id).ConfigureAwait(false);
     }
 }

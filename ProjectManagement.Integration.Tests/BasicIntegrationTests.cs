@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Xunit;
 using FluentAssertions;
 using ProjectManagement.Api;
@@ -20,13 +21,12 @@ namespace ProjectManagement.Integration.Tests
         [InlineData(Endpoints.PROJECTS)]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
-            using (var client = _factory.CreateClient())
-            {
-                var response = await client.GetAsync(url);
+            using var client = _factory.CreateClient();
+            var response = await client.GetAsync(url);
 
-                response.EnsureSuccessStatusCode(); // Status Code 200-299
-                response.Content.Headers.ContentType.ToString().Should().Be(ContentTypes.APPLICATION_JSON);
-            }
+            response.EnsureSuccessStatusCode(); // Status Code 200-299
+            response.Content.Headers.ContentType.Should().NotBeNull();
+            response.Content.Headers.ContentType!.ToString().Should().Contain(MediaTypeNames.Application.Json);
         }
     }
 }

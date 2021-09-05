@@ -2,7 +2,9 @@
 using FluentAssertions;
 using ProjectManagement.Api;
 using System.Threading.Tasks;
+using ProjectManagement.Api.Tools;
 using ProjectManagement.Integration.Tests.Utils;
+
 namespace ProjectManagement.Integration.Tests.EndpointsTests
 {
     public class FileTests : BaseClassFixture
@@ -16,11 +18,12 @@ namespace ProjectManagement.Integration.Tests.EndpointsTests
             var client = _factory.CreateClient();
 
             // Act
-            var response = await client.GetAsync(Endpoints.FILE);
+            var response = await client.GetAsync(Endpoints.FILE).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode(); // Status Code 200-299
-            response.Content.Headers.ContentType.ToString().Should().Be(ContentTypes.EXCEL);
+            response.Content.Headers.ContentType.Should().NotBeNull();
+            response.Content.Headers.ContentType!.ToString().Should().Be(Constants.ExcelContentType);
         }
     }
 }

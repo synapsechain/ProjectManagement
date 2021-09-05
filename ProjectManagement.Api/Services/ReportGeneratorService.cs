@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using ProjectManagement.Api.Tools;
-using ProjectManagement.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using ProjectManagement.Data.Entities;
-using ProjectManagement.Data.Contexts;
-using ProjectManagement.Data.Tools;
+using ProjectManagement.Api.Data;
+using ProjectManagement.Api.Models;
+using ItemState = ProjectManagement.Api.Data.Entities.ItemState;
+using Project = ProjectManagement.Api.Data.Entities.Project;
+using ProjectTask = ProjectManagement.Api.Data.Entities.ProjectTask;
 
 namespace ProjectManagement.Api.Services
 {
     public interface IReportGeneratorService
     {
-        Task<byte[]> GenerateReportFile(DateTime datetime);
+        Task<byte[]> GenerateReportFile(DateTime? datetime);
     }
 
     public class ReportGeneratorService : IReportGeneratorService
@@ -25,21 +26,22 @@ namespace ProjectManagement.Api.Services
         public const int START_ROW = 1;
         public const int START_COLUMN = 1;
         
-        private readonly ProjectManagementContext _context;
+        private readonly AppDbContext _context;
         private readonly IDateTimeService _dts;
 
-        public ReportGeneratorService(ProjectManagementContext context, IDateTimeService dts)
+        public ReportGeneratorService(AppDbContext context, IDateTimeService dts)
         {
             _context = context;
             _dts = dts;
         }
 
-        public async Task<byte[]> GenerateReportFile(DateTime datetime)
+        public async Task<byte[]> GenerateReportFile(DateTime? dateTime)
         {
+            dateTime ??= _dts.UtcNow;
             byte[] fileContents;
 
             Expression<Func<ProjectTask, bool>> taskSearch = x =>
-                x.StartDate <= datetime && 
+                x.StartDate <= dateTime && 
                 x.State == ItemState.InProgress;
 
             var tasks = await _context.ProjectTasks
@@ -47,29 +49,27 @@ namespace ProjectManagement.Api.Services
                 .Where(taskSearch)
                 .ToListAsync();
 
-            var projects = tasks.Select(x => x.TopLevelProject).Distinct();
+            var projects = tasks.Select(x => x.TopLevelProject!).Distinct();
 
-            using (var package = new ExcelPackage())
+            using var package = new ExcelPackage();
+            var page = package.Workbook.Worksheets.Add("Report");
+            var headerSize = WriteHeader(page, dateTime.Value);
+            var records = new List<ExcelRecord>();
+            var projectsIndexes = new List<int>();
+
+            foreach (var project in projects)
             {
-                var page = package.Workbook.Worksheets.Add("Report");
-                var headerSize = WriteHeader(page, datetime);
-                var records = new List<ExcelRecord>();
-                var projectsIndexes = new List<int>();
-
-                foreach (var project in projects)
-                {
-                    WriteProjectToCollection(project, 0, records, projectsIndexes, taskSearch);
-                }
-
-                page.Cells[START_ROW + headerSize, START_COLUMN].LoadFromCollection(records, true, OfficeOpenXml.Table.TableStyles.Light12);
-
-                MakeProjectsRowsBold(page, projectsIndexes, headerSize);
-                MakeDateTimeColumnsCorrectlyFormatted(page);
-
-                page.Cells[page.Dimension.Address].AutoFitColumns();
-
-                fileContents = await package.GetAsByteArrayAsync();
+                WriteProjectToCollection(project, 0, records, projectsIndexes, taskSearch);
             }
+
+            page.Cells[START_ROW + headerSize, START_COLUMN].LoadFromCollection(records, true, OfficeOpenXml.Table.TableStyles.Light12);
+
+            MakeProjectsRowsBold(page, projectsIndexes, headerSize);
+            MakeDateTimeColumnsCorrectlyFormatted(page);
+
+            page.Cells[page.Dimension.Address].AutoFitColumns();
+
+            fileContents = await package.GetAsByteArrayAsync();
 
             return fileContents;
         }
@@ -79,7 +79,7 @@ namespace ProjectManagement.Api.Services
             var columnsCount = typeof(ExcelRecord).GetProperties().Length;
             var range = page.Cells[START_ROW, START_COLUMN, START_ROW, START_COLUMN + columnsCount - 1];
             range.Merge = true;
-            range.Value = $"InProgress projects with tasks by {datetime}. Report generated at {_dts.Now}";
+            range.Value = $"InProgress projects with tasks by {datetime}. Report generated at {_dts.UtcNow}";
             range.Style.Font.Bold = true;
             range.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
             range.Style.Font.Color.SetColor(Color.Gray);
@@ -104,7 +104,7 @@ namespace ProjectManagement.Api.Services
                 .Select(x => x.ToExcelRecord(level + 1)));
 
             //add subprojects that contain specified tasks
-            foreach (var subProject in project.Projects.NeverNull().Where(x => x.AllTasks.AsQueryable().Any(taskSearch)))
+            foreach (var subProject in project.Projects.Where(x => x.AllTasks.AsQueryable().Any(taskSearch)))
             {
                 WriteProjectToCollection(subProject, level + 1, records, projectsIndexes, taskSearch);
             }

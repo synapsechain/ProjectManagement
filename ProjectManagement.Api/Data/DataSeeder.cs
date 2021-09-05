@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using ProjectManagement.Data.Entities;
+using ProjectManagement.Api.Data.Entities;
 
-namespace ProjectManagement.Data.Tools
+namespace ProjectManagement.Api.Data
 {
     public static class DataSeeder
     {
-        private static readonly Random random = new Random(DateTime.Now.Ticks.GetHashCode());
+        private static readonly Random Random = new Random(DateTime.Now.Ticks.GetHashCode());
 
         public static void Seed(this ModelBuilder modelBuilder)
         {
@@ -16,7 +16,7 @@ namespace ProjectManagement.Data.Tools
             modelBuilder.Entity<ProjectTask>().HasData(GenerateTasks());
         }
 
-        public static IEnumerable<Project> GenerateProjects()
+        private static IEnumerable<Project> GenerateProjects()
         {
             var projects = new List<Project>(Enumerable.Range(1, 12).Select(x => NewProject(x)));
             
@@ -26,10 +26,8 @@ namespace ProjectManagement.Data.Tools
             return projects;
         }
 
-        public static IEnumerable<ProjectTask> GenerateTasks()
+        private static IEnumerable<ProjectTask> GenerateTasks()
         {
-            var rnd = new Random(DateTime.Now.Ticks.GetHashCode());
-
             var tasks = new List<ProjectTask>(Enumerable.Range(1, 24).Select(x => NewTask(x, x)));
 
             tasks.AddRange(Enumerable.Range(tasks.Count + 1, 6).Select(x => NewTask(x, 3)));
@@ -44,7 +42,7 @@ namespace ProjectManagement.Data.Tools
         {
             var project = new Project
             {
-                ProjectId = id,
+                Id = id,
                 Name = $"proj {id}",
                 Code = Guid.NewGuid().ToString(),
                 ParentProjectId = parentId,
@@ -64,15 +62,15 @@ namespace ProjectManagement.Data.Tools
         {
             var project = new ProjectTask
             {
-                ProjectTaskId = id,
+                Id = id,
                 Name = $"task {id} for project {projectId}",
                 ProjectId = projectId,
                 State = ItemState.Planned,
                 //30% of tasks would have description
-                Description = random.Next(0, 9) < 3 ? $"some description for task {id}" : null,
+                Description = Random.Next(0, 9) < 3 ? $"some description for task {id}" : null,
                 StartDate = DateTime.Now,
                 FinishDate = DateTime.Now.AddDays(3),
-                ParentProjectTaskId = parentTaskId
+                ParentTaskId = parentTaskId
             };
 
             if (parentTaskId.HasValue)

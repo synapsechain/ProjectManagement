@@ -1,14 +1,14 @@
 ﻿using FluentValidation;
-using ProjectManagement.Data.Contexts;
-using ProjectManagement.Data.Entities;
+using ProjectManagement.Api.Data;
+using ProjectManagement.Api.Data.DTOs;
 
-namespace ProjectManagement.Api.Validation
+namespace ProjectManagement.Api.Validators
 {
     public class TaskDtoValidator : AbstractValidator<ProjectTaskDto>
     {
-        private readonly ProjectManagementContext _context;
+        private readonly AppDbContext _context;
 
-        public TaskDtoValidator(ProjectManagementContext context)
+        public TaskDtoValidator(AppDbContext context)
         {
             _context = context;
 
@@ -16,9 +16,9 @@ namespace ProjectManagement.Api.Validation
 
             RuleFor(x => x.ProjectId).Must(ProjectExist).WithMessage("Specified project id must exist in db");
 
-            RuleFor(x => x.ParentProjectTaskId)
+            RuleFor(x => x.ParentTaskId)
                 .Must(BeValidParentTask)
-                .When(x => x.ParentProjectTaskId.HasValue)
+                .When(x => x.ParentTaskId.HasValue)
                 .WithMessage("Task cannot have parent task from different project");
         }
 

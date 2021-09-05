@@ -1,28 +1,27 @@
 ﻿using Xunit;
 using FluentAssertions;
-using ProjectManagement.Data.Tools;
 using ProjectManagement.Tests.Utils;
-using ProjectManagement.Api.Controllers;
-using ProjectManagement.Data.Contexts;
+using ProjectManagement.Api.Data;
+using ProjectManagement.Api.Services;
 
 namespace ProjectManagement.Tests
 {
-    public class ProjectsControllerTests
+    public class ProjectServiceTests
     {
         [Fact]
         public async void PostingProject_ShouldAddProjectToDb()
         {
-            var options = UnitTestHelper.InMemoryContextOptions;
+            var db = UnitTestHelper.CreateInMemoryDb();
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Should().BeEmpty();
 
-                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
-                var result = await projectsController.PostProject(DataSeeder.NewProject(3));
+                var projectService = new ProjectService(context, UnitTestHelper.Mapper);
+                await projectService.Add(DataSeeder.NewProject(3));
             }
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Should().HaveCount(1);
             }
@@ -32,19 +31,19 @@ namespace ProjectManagement.Tests
         [Fact]
         public async void DeletingProject_ShouldDeleteProjectFromDb()
         {
-            var options = UnitTestHelper.InMemoryContextOptions;
+            var db = UnitTestHelper.CreateInMemoryDb();
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Add(DataSeeder.NewProject(3));
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 context.Projects.Should().HaveCount(1);
 
-                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
-                var result = await projectsController.DeleteProject(3);
+                var projectService = new ProjectService(context, UnitTestHelper.Mapper);
+                await projectService.DeleteOrThrow(3);
             }
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Should().BeEmpty();
             }
@@ -53,22 +52,22 @@ namespace ProjectManagement.Tests
         [Fact]
         public async void UpdatingProject_ShouldUpdateProjectInDb()
         {
-            var options = UnitTestHelper.InMemoryContextOptions;
+            var db = UnitTestHelper.CreateInMemoryDb();
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Add(DataSeeder.NewProject(3));
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 context.Projects.Should().HaveCount(1);
 
-                var projectsController = new ProjectsController(context, UnitTestHelper.Mapper);
+                var projectService = new ProjectService(context, UnitTestHelper.Mapper);
                 var project = DataSeeder.NewProject(3);
                 project.Name = "updated project name";
                 project.Code = "updated project code";
-                var result = await projectsController.PutProject(3, project);
+                await projectService.UpdateOrThrow(project);
             }
 
-            using (var context = new ProjectManagementContext(options))
+            await using (var context = db.CreateContext())
             {
                 context.Projects.Should().HaveCount(1);
                 context.Projects.Should().Contain(x =>

@@ -1,10 +1,7 @@
-﻿using ProjectManagement.Data.Entities;
-using ProjectManagement.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
+using ProjectManagement.Api.Models;
+using Project = ProjectManagement.Api.Data.Entities.Project;
+using ProjectTask = ProjectManagement.Api.Data.Entities.ProjectTask;
 
 namespace ProjectManagement.Api.Tools
 {
@@ -13,7 +10,7 @@ namespace ProjectManagement.Api.Tools
         public static ExcelRecord ToExcelRecord(this Project value, int level) =>
             new ExcelRecord
             {
-                Id = value.ProjectId,
+                Id = value.Id,
                 Name = value.Name.IndentValue(level),
                 Description = value.Code,
                 State = value.State.ToString(),
@@ -24,7 +21,7 @@ namespace ProjectManagement.Api.Tools
         public static ExcelRecord ToExcelRecord(this ProjectTask value, int level) =>
             new ExcelRecord
             {
-                Id = value.ProjectTaskId,
+                Id = value.Id,
                 Name = value.Name.IndentValue(level),
                 Description = value.Description.EmptyIfNull(),
                 State = value.State.ToString(),
@@ -45,7 +42,7 @@ namespace ProjectManagement.Api.Tools
             return res.ToString();
         }
 
-        public static string EmptyIfNull(this string value) =>
+        public static string EmptyIfNull(this string? value) =>
             value ?? string.Empty;
     }
 }

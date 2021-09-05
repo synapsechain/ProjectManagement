@@ -1,20 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProjectManagement.Data.Entities;
+using ProjectManagement.Api.Data.Entities;
 
-namespace ProjectManagement.Data.Contexts
+namespace ProjectManagement.Api.Data
 {
-    public class ProjectManagementContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<ProjectTask> ProjectTasks { get; set; }
+        public DbSet<Project> Projects { get; set; } = null!;
+        public DbSet<ProjectTask> ProjectTasks { get; set; } = null!;
 
-        public ProjectManagementContext(DbContextOptions<ProjectManagementContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Entity<Project>(ConfigureProject);
-            modelBuilder.Entity<ProjectTask>(ConfigureProjectTask);
+            builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            builder.Entity<Project>(ConfigureProject);
+            builder.Entity<ProjectTask>(ConfigureProjectTask);
         }
 
         public static void ConfigureProject(EntityTypeBuilder<Project> builder)

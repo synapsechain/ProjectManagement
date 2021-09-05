@@ -1,14 +1,14 @@
-using AutoMapper;
 using OfficeOpenXml;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using ProjectManagement.Api.Services;
-using ProjectManagement.Data.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProjectManagement.Api.Data;
+using ProjectManagement.Api.Middleware;
 
 namespace ProjectManagement.Api
 {
@@ -27,12 +27,14 @@ namespace ProjectManagement.Api
             services.AddControllers()
                 .AddFluentValidation(options => options.RegisterValidatorsFromAssemblyContaining<Startup>());
 
-            services.AddDbContext<ProjectManagementContext>(options => options
+            services.AddDbContext<AppDbContext>(options => options
                 .UseLazyLoadingProxies()
                 .UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
 
             services.AddSingleton<IDateTimeService, DateTimeService>();
-            services.AddTransient<IReportGeneratorService, ReportGeneratorService>();
+            services.AddScoped<IReportGeneratorService, ReportGeneratorService>();
+            services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<ITaskService, TaskService>();
             services.AddAutoMapper(typeof(Startup));
         }
 
@@ -44,12 +46,14 @@ namespace ProjectManagement.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProjectManagement.Api v1"));
             }
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

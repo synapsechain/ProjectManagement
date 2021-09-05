@@ -4,7 +4,7 @@ using System.Net.Http;
 using FluentAssertions;
 using ProjectManagement.Api;
 using System.Threading.Tasks;
-using ProjectManagement.Data.Tools;
+using ProjectManagement.Api.Data;
 using ProjectManagement.Integration.Tests.Utils;
 
 namespace ProjectManagement.Integration.Tests.EndpointsTests

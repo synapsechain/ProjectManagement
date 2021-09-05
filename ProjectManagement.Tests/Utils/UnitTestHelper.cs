@@ -2,8 +2,8 @@
 using AutoMapper;
 using ProjectManagement.Api.Tools;
 using Microsoft.EntityFrameworkCore;
-using ProjectManagement.Data.Contexts;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using ProjectManagement.Api.Data;
 
 namespace ProjectManagement.Tests.Utils
 {
@@ -16,19 +16,14 @@ namespace ProjectManagement.Tests.Utils
                 .ConfigureWarnings(y => y.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         }
 
-        public static DbContextOptions<ProjectManagementContext> InMemoryContextOptions
+        public static DbContextOptions<AppDbContext> CreateInMemoryDb()
         {
-            get
-            {
-                var builder = new DbContextOptionsBuilder<ProjectManagementContext>();
-                InMemoryContextOptionsBuilder(builder);
-                return builder.Options;
-            }
+            var builder = new DbContextOptionsBuilder<AppDbContext>();
+            InMemoryContextOptionsBuilder(builder);
+            return builder.Options;
         }
 
-        public static IMapper Mapper
-        {
-            get => new Mapper(new MapperConfiguration(x => x.AddProfile<AutoMapping>()));
-        }
+        public static IMapper Mapper { get; }
+            = new Mapper(new MapperConfiguration(x => x.AddProfile<MapperProfile>())); 
     }
 }

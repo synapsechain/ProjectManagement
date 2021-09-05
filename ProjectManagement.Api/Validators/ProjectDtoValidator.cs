@@ -1,15 +1,15 @@
 ﻿using System.Linq;
 using FluentValidation;
-using ProjectManagement.Data.Contexts;
-using ProjectManagement.Data.Entities;
+using ProjectManagement.Api.Data;
+using ProjectManagement.Api.Data.DTOs;
 
 namespace ProjectManagement.Api.Validators
 {
     public class ProjectDtoValidator : AbstractValidator<ProjectDto>
     {
-        private readonly ProjectManagementContext _context;
+        private readonly AppDbContext _context;
 
-        public ProjectDtoValidator(ProjectManagementContext context)
+        public ProjectDtoValidator(AppDbContext context)
         {
             _context = context;
 
@@ -24,7 +24,7 @@ namespace ProjectManagement.Api.Validators
 
         private bool Exist(int? parentProjectId)
         {
-            return _context.Projects.Any(x => x.ProjectId == parentProjectId);
+            return _context.Projects.Any(x => x.Id == parentProjectId);
         }
     }
 }
