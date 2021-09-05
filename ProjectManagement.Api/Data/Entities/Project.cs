@@ -13,9 +13,9 @@ namespace ProjectManagement.Api.Data.Entities
 
     public class Project : ProjectDto
     {
-        public Project? ParentProject { get; set; }
-        public List<Project> Projects { get; set; } = new();
-        public List<ProjectTask> Tasks { get; set; } = new();
+        public virtual Project? ParentProject { get; set; }
+        public virtual List<Project> Projects { get; set; } = new();
+        public virtual List<ProjectTask> Tasks { get; set; } = new();
 
         public IEnumerable<ProjectTask> AllTasks
         {

@@ -15,7 +15,7 @@ namespace ProjectManagement.Api.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../Quasars.Api"))
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../ProjectManagement.Api"))
                 .AddJsonFile("appsettings.Development.json", optional: false)
                 .AddEnvironmentVariables()
                 .Build();

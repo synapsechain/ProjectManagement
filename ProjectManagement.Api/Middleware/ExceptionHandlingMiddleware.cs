@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Mime;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using ProjectManagement.Api.Exceptions;
 
@@ -21,6 +22,7 @@ namespace ProjectManagement.Api.Middleware
             catch (NotFoundException nfe)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                httpContext.Response.ContentType = MediaTypeNames.Text.Plain;
                 await httpContext.Response.WriteAsync(nfe.Message).ConfigureAwait(false);
             }
         }

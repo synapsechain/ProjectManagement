@@ -5,10 +5,8 @@ namespace ProjectManagement.Api.Data.Entities
 {
     public class ProjectTask : ProjectTaskDto
     {
-        [JsonIgnore]
-        public Project? Project { get; set; }
-
-        [JsonIgnore]
+        public virtual Project? Project { get; set; }
+        
         public Project? TopLevelProject
         {
             get

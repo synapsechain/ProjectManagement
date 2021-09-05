@@ -47,7 +47,8 @@ namespace ProjectManagement.Api.Services
             var tasks = await _context.ProjectTasks
                 .Include(x => x.Project)
                 .Where(taskSearch)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
 
             var projects = tasks.Select(x => x.TopLevelProject!).Distinct();
 
@@ -69,7 +70,7 @@ namespace ProjectManagement.Api.Services
 
             page.Cells[page.Dimension.Address].AutoFitColumns();
 
-            fileContents = await package.GetAsByteArrayAsync();
+            fileContents = await package.GetAsByteArrayAsync().ConfigureAwait(false);
 
             return fileContents;
         }

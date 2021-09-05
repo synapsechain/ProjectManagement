@@ -7,7 +7,7 @@ using ProjectManagement.Api.Services;
 
 namespace ProjectManagement.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tasks")]
     [ApiController]
     public class TasksController : ControllerBase
     {
@@ -21,7 +21,7 @@ namespace ProjectManagement.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<ProjectTaskDto>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<ProjectTaskDto>> Get()
-            => await _taskService.Get();
+            => await _taskService.Get().ConfigureAwait(false);
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProjectTaskDto), StatusCodes.Status200OK)]
@@ -33,9 +33,6 @@ namespace ProjectManagement.Api.Controllers
         [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
         public async Task<IActionResult> PutProjectTask(int id, ProjectTaskDto taskDto)
         {
-            if (id != taskDto.Id)
-                return BadRequest($"Task id '{id}' != '{taskDto.ProjectId}'");
-
             await _taskService.UpdateOrThrow(taskDto).ConfigureAwait(false);
             
             return NoContent();
@@ -45,7 +42,7 @@ namespace ProjectManagement.Api.Controllers
         [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
         public async Task<IActionResult> PostProjectTask(ProjectTaskDto taskDto)
         {
-            var task = await _taskService.Add(taskDto);
+            var task = await _taskService.Add(taskDto).ConfigureAwait(false);
 
             return CreatedAtAction(nameof(Get), new { id = task.Id });
         }

@@ -37,7 +37,7 @@ namespace ProjectManagement.Api.Services
 
         public async Task<ProjectTaskDto> Get(int id)
         {
-            var projectTask = await _context.ProjectTasks.FindAsync(id)
+            var projectTask = await _context.ProjectTasks.FindAsync(id).ConfigureAwait(false)
                 ?? throw new NotFoundException(nameof(ProjectTask), id);
 
             return _mapper.Map<ProjectTaskDto>(projectTask);

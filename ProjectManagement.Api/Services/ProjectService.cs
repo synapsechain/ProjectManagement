@@ -38,7 +38,7 @@ namespace ProjectManagement.Api.Services
         
         public async Task<ProjectDto> GetOrThrow(int id)
         {
-            var project = await _context.Projects.FindAsync(id)
+            var project = await _context.Projects.FindAsync(id).ConfigureAwait(false)
                           ?? throw new NotFoundException(nameof(Project), id);
 
             return _mapper.Map<ProjectDto>(project);
@@ -57,16 +57,16 @@ namespace ProjectManagement.Api.Services
                           ?? throw new NotFoundException(nameof(Project), projectDto.Id);
             
             _mapper.Map(projectDto, project);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteOrThrow(int id)
         {
-            var project = await _context.Projects.FindAsync(id)
+            var project = await _context.Projects.FindAsync(id).ConfigureAwait(false)
                 ?? throw new NotFoundException(nameof(Project), id);
 
             _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

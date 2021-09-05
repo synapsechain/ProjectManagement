@@ -8,10 +8,5 @@ namespace ProjectManagement.Api.Exceptions
             : base($"{type} '{id}'")
         {
         }
-        
-        public NotFoundException(string message)
-            : base(message)
-        {
-        }
     }
 }

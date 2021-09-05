@@ -1,3 +1,4 @@
+using System;
 using OfficeOpenXml;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using ProjectManagement.Api.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using ProjectManagement.Api.Data;
 using ProjectManagement.Api.Middleware;
 
@@ -29,23 +31,32 @@ namespace ProjectManagement.Api
 
             services.AddDbContext<AppDbContext>(options => options
                 .UseLazyLoadingProxies()
-                .UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
+                .UseSqlServer(Configuration.GetConnectionString("db")));
 
             services.AddSingleton<IDateTimeService, DateTimeService>();
             services.AddScoped<IReportGeneratorService, ReportGeneratorService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<ITaskService, TaskService>();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ProjectManagement.Api", Version = "v1"});
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial; //EPPlus library (composing .xlsx files) licensing type
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                var db = serviceProvider.GetRequiredService<AppDbContext>().Database;
+                
+                //TODO: use cleaner option to determine whether we use in-memory db
+                if (db.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+                    db.Migrate();
             }
             
             app.UseSwagger();

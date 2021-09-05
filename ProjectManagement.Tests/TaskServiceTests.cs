@@ -84,11 +84,11 @@ namespace ProjectManagement.Tests
         [Fact]
         public async void SettingTaskStateToInProgress_AlsoSetsAllParentProjectsStatesToInProgress()
         {
+            //arrange
             var db = UnitTestHelper.CreateInMemoryDb(); //ensure that we have same db in the scope of test
 
             await using (var context = db.CreateContext())
             {
-                //setup
                 var projectService = new ProjectService(context, UnitTestHelper.Mapper);
                 await projectService.Add(DataSeeder.NewProject(3));
                 await projectService.Add(DataSeeder.NewProject(6, 3));
@@ -103,18 +103,18 @@ namespace ProjectManagement.Tests
                 await taskService.UpdateOrThrow(task);
             }
 
-            //check
+            //assert
             await using (var context = db.CreateContext())
             {
                 var projectService = new ProjectService(context, UnitTestHelper.Mapper);
 
-                var project = await projectService.GetOrThrow(9);
+                var project = await projectService.GetOrThrow(9).ConfigureAwait(false);
                 project.State.Should().Be(ItemState.InProgress);
 
-                project = await projectService.GetOrThrow(6);
+                project = await projectService.GetOrThrow(6).ConfigureAwait(false);
                 project.State.Should().Be(ItemState.InProgress);
 
-                project = await projectService.GetOrThrow(3);
+                project = await projectService.GetOrThrow(3).ConfigureAwait(false);
                 project.State.Should().Be(ItemState.InProgress);
             }
         }
@@ -122,11 +122,11 @@ namespace ProjectManagement.Tests
         [Fact]
         public async void SettingTaskStateToComplete_AlsoSetsAllParentProjectsStatesToComplete_WhenAllProjectTasksComplete()
         {
-            var db = UnitTestHelper.CreateInMemoryDb(); //ensure that we have same db in the scope of test
+            var db = UnitTestHelper.CreateInMemoryDb(); //ensure that we have same db in the scope of the test
 
             await using (var context = db.CreateContext())
             {
-                //setup
+                //arrange
                 var projectService = new ProjectService(context, UnitTestHelper.Mapper);
                 await projectService.Add(DataSeeder.NewProject(3));
                 await projectService.Add(DataSeeder.NewProject(6, 3));
@@ -142,7 +142,7 @@ namespace ProjectManagement.Tests
                 await taskService.UpdateOrThrow(task);
             }
 
-            //check
+            //assert
             await using (var context = db.CreateContext())
             {
                 var projectService = new ProjectService(context, UnitTestHelper.Mapper);
@@ -161,11 +161,11 @@ namespace ProjectManagement.Tests
         [Fact]
         public async void DeletingTask_SetsSubtasksParentProjectTaskIdToNull()
         {
-            var db = UnitTestHelper.CreateInMemoryDb(); //ensure that we have same db in the scope of test
+            var db = UnitTestHelper.CreateInMemoryDb(); //ensure that we have same db in the scope of the test
 
             await using (var context = db.CreateContext())
             {
-                //setup
+                //arrange
                 var projectService = new ProjectService(context, UnitTestHelper.Mapper);
                 await projectService.Add(DataSeeder.NewProject(3));
 
@@ -179,7 +179,7 @@ namespace ProjectManagement.Tests
                 await taskService.DeleteOrThrow(task.Id);
             }
 
-            //check
+            //assert
             await using (var context = db.CreateContext())
             {
                 var tasksService = new TaskService(context, UnitTestHelper.Mapper);

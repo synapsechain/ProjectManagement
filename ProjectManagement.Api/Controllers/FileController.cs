@@ -7,7 +7,7 @@ using ProjectManagement.Api.Tools;
 
 namespace ProjectManagement.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/file")]
     [ApiController]
     public class FileController : ControllerBase
     {
@@ -20,6 +20,7 @@ namespace ProjectManagement.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<FileResult> Get(DateTime? dateTime)
         {
             var fileContents = await _reportGeneratorService.GenerateReportFile(dateTime).ConfigureAwait(false);

@@ -22,7 +22,7 @@ namespace ProjectManagement.Integration.Tests
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
             using var client = _factory.CreateClient();
-            var response = await client.GetAsync(url);
+            var response = await client.GetAsync(url).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode(); // Status Code 200-299
             response.Content.Headers.ContentType.Should().NotBeNull();

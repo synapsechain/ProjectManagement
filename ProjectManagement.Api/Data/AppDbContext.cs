@@ -16,6 +16,8 @@ namespace ProjectManagement.Api.Data
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
             builder.Entity<Project>(ConfigureProject);
             builder.Entity<ProjectTask>(ConfigureProjectTask);
+            
+            builder.Seed();
         }
 
         public static void ConfigureProject(EntityTypeBuilder<Project> builder)

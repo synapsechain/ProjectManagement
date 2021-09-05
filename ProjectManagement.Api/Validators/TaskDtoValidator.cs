@@ -14,22 +14,19 @@ namespace ProjectManagement.Api.Validators
 
             RuleFor(x => x.Name).NotEmpty();
 
-            RuleFor(x => x.ProjectId).Must(ProjectExist).WithMessage("Specified project id must exist in db");
+            RuleFor(x => x.ProjectId).Must(ProjectExist).WithMessage(x => $"Project with id '{x.ProjectId}' should exist in db");
 
             RuleFor(x => x.ParentTaskId)
                 .Must(BeValidParentTask)
                 .When(x => x.ParentTaskId.HasValue)
-                .WithMessage("Task cannot have parent task from different project");
+                .WithMessage(x => $"Task cannot have parent task from different project. Parent task id '{x.ParentTaskId}'");
         }
 
         private bool BeValidParentTask(ProjectTaskDto task, int? parentTaskId)
         {
             var parentTask = _context.ProjectTasks.Find(parentTaskId);
             
-            if(parentTask?.ProjectId == task.ProjectId)
-                return true;
-
-            return false;
+            return parentTask?.ProjectId == task.ProjectId;
         }
 
         private bool ProjectExist(int projectId) => _context.Projects.Find(projectId) != null;

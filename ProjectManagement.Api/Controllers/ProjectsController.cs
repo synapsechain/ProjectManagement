@@ -8,7 +8,7 @@ using ProjectManagement.Api.Services;
 namespace ProjectManagement.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/projects")]
     public class ProjectsController : ControllerBase
     {
         private IProjectService _projectService; 
@@ -32,9 +32,6 @@ namespace ProjectManagement.Api.Controllers
         [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
         public async Task<IActionResult> Put(int id, ProjectDto projectDto)
         {
-            if (id != projectDto.Id)
-                return BadRequest($"Project id '{id}' != '{projectDto.Id}'");
-
             await _projectService.UpdateOrThrow(projectDto).ConfigureAwait(false);
 
             return NoContent();

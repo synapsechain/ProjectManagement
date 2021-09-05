@@ -16,24 +16,20 @@ namespace ProjectManagement.Integration.Tests.EndpointsTests
         [Fact]
         public async Task Post_ProjectWithNotExistedParentProject_ShouldResultInBadRequest()
         {
-            using (var client = _factory.CreateClient())
-            {
-                var response = await client.PostAsJsonAsync(Endpoints.PROJECTS, DataSeeder.NewProject(3, 33));
+            using var client = _factory.CreateClient();
+            var response = await client.PostAsJsonAsync(Endpoints.PROJECTS, DataSeeder.NewProject(3, 33)).ConfigureAwait(false);
 
-                response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            }
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
         [Fact]
         public async void Put_ProjectWithNotExistedParentProject_ShouldResultInBadRequest()
         {
-            using (var client = _factory.CreateClient())
-            {
-                await client.PostAsJsonAsync(Endpoints.PROJECTS, DataSeeder.NewProject(3));
-                var response = await client.PutAsJsonAsync($"{Endpoints.PROJECTS}/3", DataSeeder.NewProject(3, 33));
+            using var client = _factory.CreateClient();
+            await client.PostAsJsonAsync(Endpoints.PROJECTS, DataSeeder.NewProject(3)).ConfigureAwait(false);
+            var response = await client.PutAsJsonAsync($"{Endpoints.PROJECTS}/3", DataSeeder.NewProject(3, 33)).ConfigureAwait(false);
 
-                response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            }
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 }
