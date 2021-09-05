@@ -8,11 +8,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FED0C0B9-4273-4CC5-9CA3-8E78FC480298}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
-		Software Challenge.pdf = Software Challenge.pdf
+		software-challenge.pdf = software-challenge.pdf
 		.gitignore = .gitignore
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
-		entrypoint.sh = entrypoint.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectManagement.Tests", "ProjectManagement.Tests\ProjectManagement.Tests.csproj", "{0A3A79B1-5972-4A54-AD42-CDD712F8CE3C}"

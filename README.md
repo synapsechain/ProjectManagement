@@ -1,6 +1,6 @@
 # ProjectManagement
-It's a test task implementation example using .net core 3.1
-Task description you can find in `Software Challenge.pdf` document
+It's a test task implementation example using .net core 3.1  
+You can find task description in `software-challenge.pdf` document
 ## Dependencies
 - Microsoft.EntityFrameworkCore (SqlServer/InMemory with Code-First approach)
 - Microsoft.EntityFrameworkCore.Proxies (lazy loading for entities)
@@ -11,9 +11,9 @@ Task description you can find in `Software Challenge.pdf` document
 - xUnit (unit tests)
 - Moq (mocking dependencies in unit tests)
 ## How to run project management test solution
-- specify proper connection string in appsettings.json
-- to create a db and populate it with test data specify connection string in DesignTimeProjectManagementContext.cs
-and in Package Manager Console run: `Update-Database -Context DesignTimeProjectManagementContext`
+- `docker-compose up`
+- `dotnet ef database update`
+- http://localhost/swagger
 ## Areas of improvement
 - in general it's not a very good idea to use lazy loading for entities in production. It is used here for demo purposes only
 - add more integration & unit tests to cover more scenarios
