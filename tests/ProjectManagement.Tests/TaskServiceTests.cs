@@ -16,7 +16,7 @@ namespace ProjectManagement.Tests
 
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().BeEmpty();
+                context.Tasks.Should().BeEmpty();
 
                 var taskService = new TaskService(context, UnitTestHelper.Mapper);
                 await taskService.Add(DataSeeder.NewTask(3, 3));
@@ -24,7 +24,7 @@ namespace ProjectManagement.Tests
 
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().HaveCount(1);
+                context.Tasks.Should().HaveCount(1);
             }
         }
 
@@ -34,19 +34,19 @@ namespace ProjectManagement.Tests
             var db = UnitTestHelper.CreateInMemoryDb();
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().BeEmpty();
+                context.Tasks.Should().BeEmpty();
 
                 var taskService = new TaskService(context, UnitTestHelper.Mapper);
 
                 await taskService.Add(DataSeeder.NewTask(3, 3));
-                context.ProjectTasks.Should().HaveCount(1);
+                context.Tasks.Should().HaveCount(1);
 
                 await taskService.DeleteOrThrow(3);
             }
 
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().BeEmpty();
+                context.Tasks.Should().BeEmpty();
             }
         }
 
@@ -56,10 +56,10 @@ namespace ProjectManagement.Tests
             var db = UnitTestHelper.CreateInMemoryDb();
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().BeEmpty();
+                context.Tasks.Should().BeEmpty();
 
                 context.Projects.Add(DataSeeder.NewProject(3));
-                context.ProjectTasks.Add(DataSeeder.NewTask(3, 3));
+                context.Tasks.Add(DataSeeder.NewTask(3, 3));
 
                 var taskService = new TaskService(context, UnitTestHelper.Mapper);
 
@@ -73,7 +73,7 @@ namespace ProjectManagement.Tests
 
             await using (var context = db.CreateContext())
             {
-                context.ProjectTasks.Should().Contain(x =>
+                context.Tasks.Should().Contain(x =>
                     x.Id == 3 &&
                     x.State == ItemState.Completed &&
                     x.Name == "updated name" &&

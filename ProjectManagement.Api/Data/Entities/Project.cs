@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagement.Api.Data.DTOs;
+using ProjectManagement.Api.Tools;
 
 namespace ProjectManagement.Api.Data.Entities
 {
@@ -32,6 +35,22 @@ namespace ProjectManagement.Api.Data.Entities
 
                 return ItemState.Planned;
             }
+        }
+    }
+    
+    public class ProjectConfiguration : BaseEntityConfiguration<Project>
+    {
+        public override void Configure(EntityTypeBuilder<Project> builder)
+        {
+            base.Configure(builder);
+            
+            builder.Property(x => x.Code).IsRequired();
+            builder.Property(x => x.Name).IsRequired();
+            builder.Property(x => x.State).HasConversion<string>();
+            builder.Ignore(x => x.AllTasks);
+            builder.Ignore(x => x.CalculatedState);
+            
+            builder.ToTable(nameof(AppDbContext.Projects), Constants.DbSchemas.System);
         }
     }
 }

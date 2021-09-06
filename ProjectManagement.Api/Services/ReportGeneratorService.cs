@@ -44,7 +44,7 @@ namespace ProjectManagement.Api.Services
                 x.StartDate <= dateTime && 
                 x.State == ItemState.InProgress;
 
-            var tasks = await _context.ProjectTasks
+            var tasks = await _context.Tasks
                 .Include(x => x.Project)
                 .Where(taskSearch)
                 .ToListAsync()

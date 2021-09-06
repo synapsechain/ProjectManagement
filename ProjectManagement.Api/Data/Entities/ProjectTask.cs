@@ -1,5 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagement.Api.Data.DTOs;
+using ProjectManagement.Api.Tools;
 
 namespace ProjectManagement.Api.Data.Entities
 {
@@ -18,6 +20,20 @@ namespace ProjectManagement.Api.Data.Entities
 
                 return project;
             }
+        }
+    }
+    
+    public class ProjectTaskConfiguration : BaseEntityConfiguration<ProjectTask>
+    {
+        public override void Configure(EntityTypeBuilder<ProjectTask> builder)
+        {
+            base.Configure(builder);
+            
+            builder.Property(x => x.Name).IsRequired();
+            builder.Property(x => x.State).HasConversion<string>();
+            builder.Ignore(x => x.TopLevelProject);
+            
+            builder.ToTable(nameof(AppDbContext.Tasks), Constants.DbSchemas.System);
         }
     }
 }

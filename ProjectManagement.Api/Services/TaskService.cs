@@ -13,10 +13,10 @@ namespace ProjectManagement.Api.Services
     public interface ITaskService
     {
         Task<IEnumerable<ProjectTaskDto>> Get();
-        Task<ProjectTaskDto> Get(int id);
+        Task<ProjectTaskDto> Get(long id);
         Task<ProjectTask> Add(ProjectTaskDto taskDto);
         Task UpdateOrThrow(ProjectTaskDto taskDto);
-        Task DeleteOrThrow(int id);
+        Task DeleteOrThrow(long id);
     }
 
     public class TaskService : ITaskService
@@ -30,14 +30,14 @@ namespace ProjectManagement.Api.Services
             _mapper = mapper;
         }
         public async Task<IEnumerable<ProjectTaskDto>> Get()
-            => await _context.ProjectTasks
+            => await _context.Tasks
                 .Select(x => _mapper.Map<ProjectTaskDto>(x))
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-        public async Task<ProjectTaskDto> Get(int id)
+        public async Task<ProjectTaskDto> Get(long id)
         {
-            var projectTask = await _context.ProjectTasks.FindAsync(id).ConfigureAwait(false)
+            var projectTask = await _context.Tasks.FindAsync(id).ConfigureAwait(false)
                 ?? throw new NotFoundException(nameof(ProjectTask), id);
 
             return _mapper.Map<ProjectTaskDto>(projectTask);
@@ -45,7 +45,7 @@ namespace ProjectManagement.Api.Services
 
         public async Task<ProjectTask> Add(ProjectTaskDto taskDto)
         {
-            var task = _context.ProjectTasks.Add(_mapper.Map<ProjectTask>(taskDto));
+            var task = _context.Tasks.Add(_mapper.Map<ProjectTask>(taskDto));
             await _context.SaveChangesAsync().ConfigureAwait(false);
             return task.Entity;
         }
@@ -54,7 +54,7 @@ namespace ProjectManagement.Api.Services
         {
             await using var transaction = await _context.Database.BeginTransactionAsync().ConfigureAwait(false);
             
-            var task = await _context.ProjectTasks.FindAsync(taskDto.Id).ConfigureAwait(false)
+            var task = await _context.Tasks.FindAsync(taskDto.Id).ConfigureAwait(false)
                 ?? throw new NotFoundException(nameof(ProjectTask), taskDto.Id);
 
             if (task.State != taskDto.State)
@@ -79,19 +79,19 @@ namespace ProjectManagement.Api.Services
             }
         }
         
-        public async Task DeleteOrThrow(int id)
+        public async Task DeleteOrThrow(long id)
         {
-            var projectTask = await _context.ProjectTasks.FindAsync(id).ConfigureAwait(false)
+            var projectTask = await _context.Tasks.FindAsync(id).ConfigureAwait(false)
                               ?? throw new NotFoundException(nameof(ProjectTask), id);
 
             await using var transaction = await _context.Database.BeginTransactionAsync().ConfigureAwait(false);
             //TODO: clarify behaviour (currently it updates all nested tasks and sets their ParentProjectTaskId to null)
-            var nestedTasks = await _context.ProjectTasks
+            var nestedTasks = await _context.Tasks
                 .Where(x => x.ParentTaskId == projectTask.Id)
                 .ToListAsync().ConfigureAwait(false);
             nestedTasks.ForEach(x => x.ParentTaskId = null);
 
-            _context.ProjectTasks.Remove(projectTask);
+            _context.Tasks.Remove(projectTask);
 
             await _context.SaveChangesAsync().ConfigureAwait(false);
             await transaction.CommitAsync().ConfigureAwait(false);

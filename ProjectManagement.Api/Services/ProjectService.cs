@@ -13,10 +13,10 @@ namespace ProjectManagement.Api.Services
     public interface IProjectService
     {
         Task<IEnumerable<ProjectDto>> Get();
-        Task<ProjectDto> GetOrThrow(int id);
+        Task<ProjectDto> GetOrThrow(long id);
         Task<Project> Add(ProjectDto projectDto);
         Task UpdateOrThrow(ProjectDto projectDto);
-        Task DeleteOrThrow(int id);
+        Task DeleteOrThrow(long id);
     }
 
     public class ProjectService : IProjectService
@@ -36,7 +36,7 @@ namespace ProjectManagement.Api.Services
                 .ToListAsync()
                 .ConfigureAwait(false);
         
-        public async Task<ProjectDto> GetOrThrow(int id)
+        public async Task<ProjectDto> GetOrThrow(long id)
         {
             var project = await _context.Projects.FindAsync(id).ConfigureAwait(false)
                           ?? throw new NotFoundException(nameof(Project), id);
@@ -60,7 +60,7 @@ namespace ProjectManagement.Api.Services
             await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task DeleteOrThrow(int id)
+        public async Task DeleteOrThrow(long id)
         {
             var project = await _context.Projects.FindAsync(id).ConfigureAwait(false)
                 ?? throw new NotFoundException(nameof(Project), id);

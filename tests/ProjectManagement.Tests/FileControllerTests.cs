@@ -38,9 +38,9 @@ namespace ProjectManagement.Tests
                 context.Projects.Add(DataSeeder.NewProject(6));
                 context.Projects.Add(DataSeeder.NewProject(9));
 
-                context.ProjectTasks.Add(task);
-                context.ProjectTasks.Add(DataSeeder.NewTask(6, 6));
-                context.ProjectTasks.Add(DataSeeder.NewTask(9, 9));
+                context.Tasks.Add(task);
+                context.Tasks.Add(DataSeeder.NewTask(6, 6));
+                context.Tasks.Add(DataSeeder.NewTask(9, 9));
                 context.SaveChanges();
             }
 

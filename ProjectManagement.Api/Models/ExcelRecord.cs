@@ -5,7 +5,7 @@ namespace ProjectManagement.Api.Models
 {
     public class ExcelRecord
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; } = string.Empty;
         [Description("Project code/Task description")]
         public string Description { get; set; } = string.Empty;

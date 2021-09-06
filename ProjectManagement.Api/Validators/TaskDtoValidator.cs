@@ -22,13 +22,13 @@ namespace ProjectManagement.Api.Validators
                 .WithMessage(x => $"Task cannot have parent task from different project. Parent task id '{x.ParentTaskId}'");
         }
 
-        private bool BeValidParentTask(ProjectTaskDto task, int? parentTaskId)
+        private bool BeValidParentTask(ProjectTaskDto task, long? parentTaskId)
         {
-            var parentTask = _context.ProjectTasks.Find(parentTaskId);
+            var parentTask = _context.Tasks.Find(parentTaskId);
             
             return parentTask?.ProjectId == task.ProjectId;
         }
 
-        private bool ProjectExist(int projectId) => _context.Projects.Find(projectId) != null;
+        private bool ProjectExist(long projectId) => _context.Projects.Find(projectId) != null;
     }
 }

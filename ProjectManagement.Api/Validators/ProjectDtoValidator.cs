@@ -22,7 +22,7 @@ namespace ProjectManagement.Api.Validators
                 .WithMessage(x => $"There are no such project with id = {x.ParentProjectId}");
         }
 
-        private bool Exist(int? parentProjectId)
+        private bool Exist(long? parentProjectId)
         {
             return _context.Projects.Any(x => x.Id == parentProjectId);
         }
