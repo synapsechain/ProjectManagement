@@ -14,9 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectManagement.Tests", "ProjectManagement.Tests\ProjectManagement.Tests.csproj", "{0A3A79B1-5972-4A54-AD42-CDD712F8CE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectManagement.Tests", "tests\ProjectManagement.Tests\ProjectManagement.Tests.csproj", "{0A3A79B1-5972-4A54-AD42-CDD712F8CE3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectManagement.Integration.Tests", "ProjectManagement.Integration.Tests\ProjectManagement.Integration.Tests.csproj", "{93554E2D-8FB8-475A-AF64-FB9F85BD7711}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectManagement.Integration.Tests", "tests\ProjectManagement.Integration.Tests\ProjectManagement.Integration.Tests.csproj", "{93554E2D-8FB8-475A-AF64-FB9F85BD7711}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{721C3131-34D3-4230-A96B-2AD58FD38466}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +44,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF689A43-910F-47B4-8BC0-EB91C3418CCF}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{93554E2D-8FB8-475A-AF64-FB9F85BD7711} = {721C3131-34D3-4230-A96B-2AD58FD38466}
+		{0A3A79B1-5972-4A54-AD42-CDD712F8CE3C} = {721C3131-34D3-4230-A96B-2AD58FD38466}
 	EndGlobalSection
 EndGlobal

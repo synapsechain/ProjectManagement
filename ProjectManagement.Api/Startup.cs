@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using OfficeOpenXml;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -68,6 +69,11 @@ namespace ProjectManagement.Api
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGet("", context =>
+                {
+                    context.Response.Redirect("/swagger", false);
+                    return Task.CompletedTask;
+                });
                 endpoints.MapControllers();
             });
         }

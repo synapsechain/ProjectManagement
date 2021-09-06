@@ -24,6 +24,6 @@ namespace ProjectManagement.Tests.Utils
         }
 
         public static IMapper Mapper { get; }
-            = new Mapper(new MapperConfiguration(x => x.AddProfile<MapperProfile>())); 
+            = new Mapper(new MapperConfiguration(x => x.AddProfile<MapperProfile>()));
     }
 }
