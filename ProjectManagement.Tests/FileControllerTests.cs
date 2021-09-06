@@ -46,7 +46,7 @@ namespace ProjectManagement.Tests
 
             await using (var context = db.CreateContext())
             {
-                var fileController = new FileController(dts.Object, new ReportGeneratorService(context, dts.Object));
+                var fileController = new ReportsController(dts.Object, new ReportGeneratorService(context, dts.Object));
                 var file =
                     await fileController.Get(new DateTime(2020, 4, 20, 3, 3, 3)) as FileContentResult;
                 file.Should().NotBeNull();

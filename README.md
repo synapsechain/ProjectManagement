@@ -1,7 +1,7 @@
 # ProjectManagement
 It's a test task implementation example using .net core 3.1  
 You can find task description in `software-challenge.pdf` document  
-Excel file generation (/file endpoint) currently works on Windows only due to EPPlus package limitations
+Excel file generation (/reports/simple endpoint) currently works on Windows only due to EPPlus package limitations
 ## Dependencies
 - Microsoft.EntityFrameworkCore (SqlServer/InMemory with Code-First approach)
 - Microsoft.EntityFrameworkCore.Proxies (lazy loading for entities)
