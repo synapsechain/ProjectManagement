@@ -14,7 +14,7 @@ Excel file generation (/file endpoint) currently works on Windows only due to EP
 ## How to run project management test solution
 - `docker-compose up` to run image of sql server locally
 - `dotnet ef database update` to setup database
-- http://localhost:9999/swagger
+- http://localhost:3333/swagger
 ## Areas of improvement
 - in general it's not a very good idea to use lazy loading for entities in production. It is used here for demo purposes only
 - Change EPPlus package for excel file generation to something cross-platform to support linux
