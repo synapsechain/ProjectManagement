@@ -22,3 +22,4 @@ If you want to test this endpoint you should use Windows containers (not tested)
 - add more integration & unit tests to cover more scenarios
 - add logging
 - consider using EFCore.BulkExtensions package to optimize performance for bulk operations
+- move data related classes (entities, their configurations, DTOs, context) to separate project? (need to think about benefits)
