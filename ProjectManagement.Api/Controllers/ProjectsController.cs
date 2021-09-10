@@ -8,7 +8,7 @@ using ProjectManagement.Api.Services;
 namespace ProjectManagement.Api.Controllers
 {
     [ApiController]
-    [Route("api/projects")]
+    [Route("api/[controller]")]
     public class ProjectsController : ControllerBase
     {
         private IProjectService _projectService; 

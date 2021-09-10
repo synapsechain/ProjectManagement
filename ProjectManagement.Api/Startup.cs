@@ -43,6 +43,7 @@ namespace ProjectManagement.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "ProjectManagement.Api", Version = "v1"});
             });
+            services.AddRouting(x => x.LowercaseUrls = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
