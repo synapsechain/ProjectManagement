@@ -8,7 +8,7 @@ using ProjectManagement.Api.Tools;
 namespace ProjectManagement.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ReportsController : ControllerBase
     {
         private readonly IReportGeneratorService _reportGeneratorService;

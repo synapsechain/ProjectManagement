@@ -2,8 +2,8 @@
 {
     public static class Endpoints
     {
-        public const string FILE     = "api/reports/simple";
-        public const string TASKS    = "api/tasks";
-        public const string PROJECTS = "api/projects";
+        public const string FILE     = "reports/simple";
+        public const string TASKS    = "tasks";
+        public const string PROJECTS = "projects";
     }
 }

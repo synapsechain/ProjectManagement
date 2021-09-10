@@ -8,7 +8,7 @@ using ProjectManagement.Api.Services;
 namespace ProjectManagement.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;
